@@ -25,7 +25,6 @@
 
 #include "raylib.h"
 #include "screens.h"
-#include <stdio.h>
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -61,7 +60,7 @@ void InitTitleScreen(void)
 
     // Button variables
     showButton = false;
-    button = LoadTexture("../resources/button.png");
+    button = LoadTexture("resources/button.png");
     frameHeight = (float)button.height / 3;
     sourceRec = (Rectangle) { 0, 0, (float)button.width, frameHeight };
     btnBounds = (Rectangle){ GetScreenWidth() / 2.0f - button.width / 2.0f, GetScreenHeight() / 2.0f - button.height / 3 / 2.0f + 150, (float)button.width, frameHeight };
@@ -110,8 +109,7 @@ void UpdateTitleScreen(void)
 
     /* Load Default ROM*/
     if (IsKeyPressed(KEY_ENTER)) {
-        PlaySound(fxCoin);
-        TextCopy(file_name, "../resources/roms/pong.c8");
+        TextCopy(file_name, "resources/roms/pong.c8");
         finishScreen = 1;
     }
 }
@@ -137,7 +135,7 @@ void DrawTitleScreen(void)
 void UnloadTitleScreen(void)
 {
     //Unload TITLE screen variables here!
-    UnloadTexture(button); // weird line that appears when I unload, not sure how to fix. has something to do with texture
+    UnloadTexture(button); // weird line that appears when i unload, not sure how to fix. has something to do with texture
 }
 
 // Title Screen should finish?

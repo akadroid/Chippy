@@ -2,5 +2,3 @@ raylib-master
 _build
 _bin
 .vs
-/cmake-build-debug/
-/build/
