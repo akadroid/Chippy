@@ -25,7 +25,6 @@
 
 #include "raylib.h"
 #include "screens.h"
-#include "emulator.h"
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -106,6 +105,12 @@ void UpdateTitleScreen(void)
 
         // Calculate button frame rectangle to draw depending on button state
         sourceRec.y = btnState * frameHeight;
+    }
+
+    /* Load Default ROM*/
+    if (IsKeyPressed(KEY_ENTER)) {
+        TextCopy(file_name, "resources/roms/pong.c8");
+        finishScreen = 1;
     }
 }
 

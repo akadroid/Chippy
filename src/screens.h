@@ -38,6 +38,8 @@ extern GameScreen currentScreen;
 extern Font font;
 extern Music music;
 extern Sound fxCoin;
+extern Sound fxBeep;
+extern char file_name[];	// global string to keep path of file
 
 #ifdef __cplusplus
 extern "C" {            // Prevents name mangling of functions

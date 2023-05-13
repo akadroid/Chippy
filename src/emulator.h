@@ -21,9 +21,6 @@
 #define GET_BYTE(n) ((n) & 0x00FF)
 #define GET_ADDRESS(n) ((n) & 0x0FFF)
 
-// global string to keep path of file
-extern char file_name[];
-
 struct Chip8 {
 	uint8_t memory[4096];
 	uint8_t registers[16];

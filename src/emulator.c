@@ -69,8 +69,13 @@ void Cycle(struct Chip8 *chip)
 		OP_1NNN(chip);
 		break;
 
-	case 0x3:
+	case 0x2:
 		printf("2\n");
+		OP_2NNN(chip);
+		break;
+
+	case 0x3:
+		printf("3\n");
 		OP_3XNN(chip);
 		break;
 
@@ -218,14 +223,14 @@ void Cycle(struct Chip8 *chip)
 		break;
 
 	default:
-		printf("opcode error\n");
+		printf("ERROR: %x\n", chip->opcode);
 	}
 
 	// timers
 	if (chip->delayTimer > 0)
 		(chip->delayTimer)--;
 	if (chip->soundTimer > 0)
-		(chip->delayTimer)--;
+		(chip->soundTimer)--;
 }
 
 // Load ROM content into Chip8 memory

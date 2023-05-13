@@ -26,7 +26,6 @@
 #include "raylib.h"
 #include "screens.h"
 #include "emulator.h"
-#include <stdint.h>
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -66,14 +65,110 @@ void InitGameplayScreen(void)
 void UpdateGameplayScreen(void)
 {
     // Update GAMEPLAY screen variables here!
-    // Press enter or tap to change to ENDING screen
-    if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
+    
+    // Update if Key pressed
+    switch (GetKeyPressed()) {
+    case KEY_X:
+        emulator->keypad[0x0] = 1;
+        break;
+    case KEY_ONE:
+        emulator->keypad[0x1] = 1;
+        break;
+    case KEY_TWO:
+        emulator->keypad[0x2] = 1;
+        break;
+    case KEY_THREE:
+        emulator->keypad[0x3] = 1;
+        break;
+    case KEY_Q:
+        emulator->keypad[0x4] = 1;
+        break;
+    case KEY_W:
+        emulator->keypad[0x5] = 1;
+        break;
+    case KEY_E:
+        emulator->keypad[0x6] = 1;
+        break;
+    case KEY_A:
+        emulator->keypad[0x7] = 1;
+        break;
+    case KEY_S:
+        emulator->keypad[0x8] = 1;
+        break;
+    case KEY_D:
+        emulator->keypad[0x9] = 1;
+        break;
+    case KEY_Z:
+        emulator->keypad[0xA] = 1;
+        break;
+    case KEY_C:
+        emulator->keypad[0xB] = 1;
+        break;
+    case KEY_FOUR:
+        emulator->keypad[0xC] = 1;
+        break;
+    case KEY_R:
+        emulator->keypad[0xD] = 1;
+        break;
+    case KEY_F:
+        emulator->keypad[0xE] = 1;
+        break;
+    case KEY_V:
+        emulator->keypad[0xF] = 1;
+        break;
+    default:
+        break;
+    }
+
+    // Update if key released
+    if (IsKeyReleased(KEY_X))
+        emulator->keypad[0x0] = 0;
+    else if (IsKeyReleased(KEY_ONE))
+        emulator->keypad[0x1] = 0;
+    else if (IsKeyReleased(KEY_TWO))
+        emulator->keypad[0x2] = 0;
+    else if (IsKeyReleased(KEY_THREE))
+        emulator->keypad[0x3] = 0;
+    else if (IsKeyReleased(KEY_Q))
+        emulator->keypad[0x4] = 0;
+    else if (IsKeyReleased(KEY_W))
+        emulator->keypad[0x5] = 0;
+    else if (IsKeyReleased(KEY_E))
+        emulator->keypad[0x6] = 0;
+    else if (IsKeyReleased(KEY_A))
+        emulator->keypad[0x7] = 0;
+    else if (IsKeyReleased(KEY_S))
+        emulator->keypad[0x8] = 0;
+    else if (IsKeyReleased(KEY_D))
+        emulator->keypad[0x9] = 0;
+    else if (IsKeyReleased(KEY_Z))
+        emulator->keypad[0xA] = 0;
+    else if (IsKeyReleased(KEY_C))
+        emulator->keypad[0xB] = 0;
+    else if (IsKeyReleased(KEY_FOUR))
+        emulator->keypad[0xC] = 0;
+    else if (IsKeyReleased(KEY_R))
+        emulator->keypad[0xD] = 0;
+    else if (IsKeyReleased(KEY_F))
+        emulator->keypad[0xE] = 0;
+    else if (IsKeyReleased(KEY_V))
+        emulator->keypad[0xF] = 0;
+
+    // Click to switch to title
+    if (IsKeyPressed(KEY_ENTER))
     {
         PlaySound(fxCoin);
         finishScreen = 1; // TITLE
     }
-    
+
+    // Sound
+    if (emulator->soundTimer > 0)
+        PlaySound(fxBeep);
+
+    // Fetch-Decode-Execute
     Cycle(emulator);
+
+    // Turns the video memory into a displayable texture
     UpdateTexture(texture, emulator->video);
 }
 

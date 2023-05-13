@@ -24,6 +24,7 @@
 GameScreen currentScreen = TITLE;
 Font font = { 0 };
 Music music = { 0 };
+Sound fxBeep = { 0 };
 Sound fxCoin = { 0 };
 
 //----------------------------------------------------------------------------------
@@ -64,6 +65,7 @@ int main(void)
     // Load global data (assets that must be available in all screens, i.e. font)
     font = LoadFont("resources/mecha.png");
     fxCoin = LoadSound("resources/coin.wav");
+    fxBeep = LoadSound("resources/beep.wav");
     srand(time(NULL));
 
     // Setup and init first screen
@@ -71,14 +73,14 @@ int main(void)
     InitTitleScreen();
 
     // Set Window icon =)
-    Image icon = LoadImage("resources/rika.png");
+    Image icon = LoadImage("resources/rika64.png");
     SetWindowIcon(icon);
     UnloadImage(icon);
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
-    SetTargetFPS(60);       // Set our game to run at 60 frames-per-second
+    SetTargetFPS(240);       // Should be changed depending on ROM
     //--------------------------------------------------------------------------------------
 
     // Main game loop
@@ -101,6 +103,7 @@ int main(void)
     // Unload global data loaded
     UnloadFont(font);
     UnloadSound(fxCoin);
+    UnloadSound(fxBeep);
 
     CloseAudioDevice();     // Close audio context
 
