@@ -23,27 +23,21 @@
 *
 **********************************************************************************************/
 
-
-
 #include "raylib.h"
 #include "screens.h"
 #include "emulator.h"
 #include <stdint.h>
+
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
 static int framesCounter = 0;
 static int finishScreen = 0;
-static Image* image = NULL;
+Image image;
 Texture2D texture;
-static uint32_t BRUH[] = { 0xFFFFFFFF, 0xFFFFFFFF };
-Vector2 position = { 100,100 };
+Vector2 position = { 0,0 };
 struct Chip8* emulator = NULL;
 
-const char *filename = "IB.ch8";
-
-int x = -5;
-int y = -5;
 //----------------------------------------------------------------------------------
 // Gameplay Screen Functions Definition
 //----------------------------------------------------------------------------------
@@ -51,56 +45,51 @@ int y = -5;
 // Gameplay Screen Initialization logic
 void InitGameplayScreen(void)
 {
-    // TODO: Initialize GAMEPLAY screen variables here!
+    //Initialize GAMEPLAY screen variables here!
     framesCounter = 0;
     finishScreen = 0;
 
-    image = (Image*)malloc(sizeof(Image));
-    image->data = NULL;
-    image->format = (int)PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-    image->mipmaps = 1;
-    image->height = VIDEO_HEIGHT;
-    image->width = VIDEO_WIDTH;
+    image.data = NULL;
+    image.format = (int)PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image.mipmaps = 1;
+    image.height = VIDEO_HEIGHT;
+    image.width = VIDEO_WIDTH;
 
     emulator = createEmulator();
-    loadRom(emulator, filename);
+    loadRom(emulator, file_name);
     loadFonts(emulator);
 
-    texture = LoadTextureFromImage(*image);
-    //UpdateTexture(texture, emulator->video);
-    //UnloadImage(*image);
+    texture = LoadTextureFromImage(image);
 }
 
 // Gameplay Screen Update logic
 void UpdateGameplayScreen(void)
 {
-    // TODO: Update GAMEPLAY screen variables here!
+    // Update GAMEPLAY screen variables here!
     // Press enter or tap to change to ENDING screen
     if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
     {
-        //finishScreen = 1;
         PlaySound(fxCoin);
+        finishScreen = 1; // TITLE
     }
     
     Cycle(emulator);
-    //texture = LoadTextureFromImage(*image);
     UpdateTexture(texture, emulator->video);
 }
 
 // Gameplay Screen Draw logic
 void DrawGameplayScreen(void)
 {
-    // TODO: Draw GAMEPLAY screen here!
+    // Draw GAMEPLAY screen here!
     ClearBackground(BLACK);
-    DrawTextureEx(texture, position, 0, 10, RED);
+    DrawTextureEx(texture, position, 0, 10, SKYBLUE);
 }
 
 // Gameplay Screen Unload logic
 void UnloadGameplayScreen(void)
 {
-    // TODO: Unload GAMEPLAY screen variables here!
+    // Unload GAMEPLAY screen variables here!
     UnloadTexture(texture);
-    free(image);
     free(emulator);
 }
 

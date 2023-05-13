@@ -1,20 +1,17 @@
 /*******************************************************************************************
 *
-*   raylib game template
-*
-*   <Game title>
-*   <Game description>
+*   Chip-8 Emulator
 *
 *   This game has been created using raylib (www.raylib.com)
 *   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
+*   Structured after raylib-game-template
+* 
 *   Copyright (c) 2021 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
 #include "raylib.h"
 #include "screens.h"    // NOTE: Declares global (extern) variables and screens functions
-#include "emulator.h"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -24,7 +21,7 @@
 // Shared Variables Definition (global)
 // NOTE: Those variables are shared between modules through screens.h
 //----------------------------------------------------------------------------------
-GameScreen currentScreen = LOGO;
+GameScreen currentScreen = TITLE;
 Font font = { 0 };
 Music music = { 0 };
 Sound fxCoin = { 0 };
@@ -60,22 +57,23 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib game template");
+    InitWindow(screenWidth, screenHeight, "Chip-8 Emulator");
 
     InitAudioDevice();      // Initialize audio device
 
     // Load global data (assets that must be available in all screens, i.e. font)
     font = LoadFont("resources/mecha.png");
-    music = LoadMusicStream("resources/ambient.ogg");
     fxCoin = LoadSound("resources/coin.wav");
     srand(time(NULL));
 
-    SetMusicVolume(music, 1.0f);
-    //PlayMusicStream(music);
-
     // Setup and init first screen
     currentScreen = TITLE;
-    InitLogoScreen();
+    InitTitleScreen();
+
+    // Set Window icon =)
+    Image icon = LoadImage("resources/rika.png");
+    SetWindowIcon(icon);
+    UnloadImage(icon);
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -95,16 +93,13 @@ int main(void)
     // Unload current screen data before closing
     switch (currentScreen)
     {
-        case LOGO: UnloadLogoScreen(); break;
         case TITLE: UnloadTitleScreen(); break;
         case GAMEPLAY: UnloadGameplayScreen(); break;
-        case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
 
     // Unload global data loaded
     UnloadFont(font);
-    UnloadMusicStream(music);
     UnloadSound(fxCoin);
 
     CloseAudioDevice();     // Close audio context
@@ -124,20 +119,16 @@ static void ChangeToScreen(GameScreen screen)
     // Unload current screen
     switch (currentScreen)
     {
-        case LOGO: UnloadLogoScreen(); break;
         case TITLE: UnloadTitleScreen(); break;
         case GAMEPLAY: UnloadGameplayScreen(); break;
-        case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
 
     // Init next screen
     switch (screen)
     {
-        case LOGO: InitLogoScreen(); break;
         case TITLE: InitTitleScreen(); break;
         case GAMEPLAY: InitGameplayScreen(); break;
-        case ENDING: InitEndingScreen(); break;
         default: break;
     }
 
@@ -170,21 +161,16 @@ static void UpdateTransition(void)
             // Unload current screen
             switch (transFromScreen)
             {
-                case LOGO: UnloadLogoScreen(); break;
                 case TITLE: UnloadTitleScreen(); break;
-                case OPTIONS: UnloadOptionsScreen(); break;
                 case GAMEPLAY: UnloadGameplayScreen(); break;
-                case ENDING: UnloadEndingScreen(); break;
                 default: break;
             }
 
             // Load next screen
             switch (transToScreen)
             {
-                case LOGO: InitLogoScreen(); break;
                 case TITLE: InitTitleScreen(); break;
                 case GAMEPLAY: InitGameplayScreen(); break;
-                case ENDING: InitEndingScreen(); break;
                 default: break;
             }
 
@@ -226,41 +212,18 @@ static void UpdateDrawFrame(void)
     {
         switch(currentScreen)
         {
-            case LOGO:
-            {
-                UpdateLogoScreen();
-
-                if (FinishLogoScreen()) TransitionToScreen(TITLE);
-
-            } break;
             case TITLE:
             {
                 UpdateTitleScreen();
 
-                if (FinishTitleScreen() == 1) TransitionToScreen(OPTIONS);
-                else if (FinishTitleScreen() == 2) TransitionToScreen(GAMEPLAY);
-
-            } break;
-            case OPTIONS:
-            {
-                UpdateOptionsScreen();
-
-                if (FinishOptionsScreen()) TransitionToScreen(TITLE);
+                if (FinishTitleScreen() == 1) TransitionToScreen(GAMEPLAY);
 
             } break;
             case GAMEPLAY:
             {
                 UpdateGameplayScreen();
 
-                if (FinishGameplayScreen() == 1) TransitionToScreen(ENDING);
-                else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
-
-            } break;
-            case ENDING:
-            {
-                UpdateEndingScreen();
-
-                if (FinishEndingScreen() == 1) TransitionToScreen(TITLE);
+                if (FinishGameplayScreen() == 1) TransitionToScreen(TITLE);
 
             } break;
             default: break;
@@ -277,18 +240,13 @@ static void UpdateDrawFrame(void)
 
         switch(currentScreen)
         {
-            case LOGO: DrawLogoScreen(); break;
             case TITLE: DrawTitleScreen(); break;
-            case OPTIONS: DrawOptionsScreen(); break;
             case GAMEPLAY: DrawGameplayScreen(); break;
-            case ENDING: DrawEndingScreen(); break;
             default: break;
         }
 
         // Draw full screen rectangle in front of everything
         if (onTransition) DrawTransition();
-
-        //DrawFPS(10, 10);
 
     EndDrawing();
     //----------------------------------------------------------------------------------

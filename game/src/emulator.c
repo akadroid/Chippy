@@ -5,21 +5,13 @@
 #include <string.h>
 #include "emulator.h"
 
+// Chip-8 Emulator created by Danny Huynh
+
+// Resources
+// https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#execute
 // https://austinmorlan.com/posts/chip8_emulator/
 // https://www.raylib.com/
-// https://stackoverflow.com/questions/2029103/correct-way-to-read-a-text-file-into-a-buffer-in-c
 // https://en.wikipedia.org/wiki/CHIP-8
-// https://www.tutorialspoint.com/difference-between-call-and-jump-instructions
-
-/*
-00E0 (clear screen)
-1NNN (jump)
-6XNN (set register VX)
-7XNN (add value to register VX)
-ANNN (set index register I)
-DXYN
-*/
-static const char* file_namer = "C:/raylib/Chippy/_bin/Debug/bc_test.ch8";
 
 struct Chip8* createEmulator()
 {
@@ -39,6 +31,7 @@ struct Chip8* createEmulator()
 
 	return emulator;
 }
+
 // Fetch, Decode, Execute Cycle
 void Cycle(struct Chip8 *chip)
 {
@@ -223,8 +216,9 @@ void Cycle(struct Chip8 *chip)
 			break;
 		}
 		break;
+
 	default:
-		printf("opcode error\n BRUHHH\n");
+		printf("opcode error\n");
 	}
 
 	// timers
@@ -238,9 +232,10 @@ void Cycle(struct Chip8 *chip)
 void loadRom(struct Chip8 *chip, const char *filename) 
 {
 	FILE *file;
-	file = fopen(file_namer, "rb");
+	file = fopen(filename, "rb");
 	if (file == NULL) {
 		printf("Error while opening file\n");
+		printf("%s\n", filename);
 		exit(1);
 	}
 
@@ -253,7 +248,7 @@ void loadRom(struct Chip8 *chip, const char *filename)
 	size_t len = fread(buffer, sizeof(char), bufsize, file);
 	if (ferror(file) != 0) {
 		fputs("Error reading file", stderr);
-		exit(69);
+		exit(2);
 	} else {
 		buffer[len++] = '\0';
 	}
@@ -295,13 +290,13 @@ void OP_00EE(struct Chip8 *chip)
 
 void OP_1NNN(struct Chip8 *chip)
 {
-	uint16_t address = chip->opcode & 0x0FFF;
+	uint16_t address = GET_ADDRESS(chip->opcode);
 	chip->PC = address;
 }
 
 void OP_2NNN(struct Chip8 *chip)
 {
-	uint16_t address = chip->opcode & 0x0FFF;
+	uint16_t address = GET_ADDRESS(chip->opcode);
 	chip->stack[chip->SP] = chip->PC;
 	(chip->SP)++;
 	chip->PC = address;
@@ -309,8 +304,8 @@ void OP_2NNN(struct Chip8 *chip)
 
 void OP_3XNN(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t byte = chip->opcode & 0x00FF;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t byte = GET_BYTE(chip->opcode);
 
 	// skip instruction
 	if (chip->registers[x] == byte)
@@ -319,18 +314,18 @@ void OP_3XNN(struct Chip8 *chip)
 
 void OP_4XNN(struct Chip8 *chip)
 {
-	uint8_t address = chip->opcode & 0x00FF;
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
+	uint8_t byte = GET_BYTE(chip->opcode);
+	uint8_t x = GET_X(chip->opcode);
 
 	// skip instruction
-	if (chip->registers[x] != address)
+	if (chip->registers[x] != byte)
 		chip->PC += 2;
 }
 
 void OP_5XY0(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	// skip instruction
 	if (chip->registers[x] == chip->registers[y])
@@ -339,7 +334,7 @@ void OP_5XY0(struct Chip8 *chip)
 
 void OP_6XNN(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
+	uint8_t x = GET_X(chip->opcode);
 	uint8_t byte = chip->opcode & 0x00FF;
 	chip->registers[x] = byte;
 }
@@ -354,40 +349,40 @@ void OP_7XNN(struct Chip8 *chip)
 
 void OP_8XY0(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	chip->registers[x] = chip->registers[y];
 }
 
 void OP_8XY1(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	chip->registers[x] |= chip->registers[y];
 }
 
 void OP_8XY2(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	chip->registers[x] &= chip->registers[y];
 }
 
 void OP_8XY3(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	chip->registers[x] ^= chip->registers[y];
 }
 
 void OP_8XY4(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 	uint16_t sum = chip->registers[x] + chip->registers[y];
 
 	if (sum > 255)
@@ -401,8 +396,8 @@ void OP_8XY4(struct Chip8 *chip)
 
 void OP_8XY5(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	if (chip->registers[x] > chip->registers[y])
 		chip->registers[0xF] = 1;
@@ -414,7 +409,7 @@ void OP_8XY5(struct Chip8 *chip)
 
 void OP_8XY6(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
+	uint8_t x = GET_X(chip->opcode);
 
 	// Store least signicant bit of VX in VF
 	chip->registers[0xF] = chip->registers[x] & 1;
@@ -424,8 +419,8 @@ void OP_8XY6(struct Chip8 *chip)
 
 void OP_8XY7(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	if (chip->registers[y] > chip->registers[x])
 		chip->registers[0xF] = 1;
@@ -437,7 +432,7 @@ void OP_8XY7(struct Chip8 *chip)
 
 void OP_8XYE(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
+	uint8_t x = GET_X(chip->opcode);
 
 	// Store most significant bit of VX in VF
 	chip->registers[0xF] = (chip->registers[x] & (1 << 7)) >> 7;
@@ -447,8 +442,8 @@ void OP_8XYE(struct Chip8 *chip)
 
 void OP_9XY0(struct Chip8 *chip)
 {
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t y = (chip->opcode & 0x00F0) >> 4;
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t y = GET_Y(chip->opcode);
 
 	if (chip->registers[x] != chip->registers[y])
 		chip->PC += 2;
@@ -456,21 +451,21 @@ void OP_9XY0(struct Chip8 *chip)
 
 void OP_ANNN(struct Chip8 *chip)
 {
-	uint16_t address = (chip->opcode & 0x0FFF);
+	uint16_t address = GET_ADDRESS(chip->opcode);
 	chip->index = address;
 }
 
 void OP_BNNN(struct Chip8 *chip)
 {
-	uint16_t address = (chip->opcode & 0x0FFF);
+	uint16_t address = GET_ADDRESS(chip->opcode);
 	chip->PC = address + chip->registers[0];
 }
 
 void OP_CXNN(struct Chip8 *chip)
 {
 	uint8_t ran_num = randByte();
-	uint8_t x = (chip->opcode & 0x0F00) >> 8;
-	uint8_t byte = (chip->opcode & 0x00FF);
+	uint8_t x = GET_X(chip->opcode);
+	uint8_t byte = GET_BYTE(chip->opcode);
 	chip->registers[x] =  byte & ran_num;
 }
 
@@ -488,10 +483,7 @@ void OP_DXYN(struct Chip8 *chip)
 		uint8_t sprite_data = chip->memory[chip->index + row];
 
 		for (unsigned int col = 0; col < 8; col++) {
-			//printf("%i\n", j);
-			//uint8_t pixel_check = 128 >> j;
-			//uint8_t sprite_pixel = sprite_data & pixel_check;
-			uint8_t sprite_pixel = sprite_data & (0x80U >> col);
+			uint8_t sprite_pixel = sprite_data & (0x80 >> col);
 			uint32_t screen_pixel = chip->video[(x_coord + col) + (y_coord + row)*VIDEO_WIDTH];
 
 			if (sprite_pixel) {
@@ -530,36 +522,52 @@ void OP_FX0A(struct Chip8* chip)
 	
 	if (chip->keypad[0x0])
 		chip->registers[x] = 0x0;
+
 	else if (chip->keypad[0x1])
 		chip->registers[x] = 0x1;
+
 	else if (chip->keypad[0x2])
 		chip->registers[x] = 0x2;
+
 	else if (chip->keypad[0x3])
 		chip->registers[x] = 0x3;
+
 	else if (chip->keypad[0x4])
 		chip->registers[x] = 0x4;
+
 	else if (chip->keypad[0x5])
 		chip->registers[x] = 0x5;
+
 	else if (chip->keypad[0x6])
 		chip->registers[x] = 0x6;
+
 	else if (chip->keypad[0x7])
 		chip->registers[x] = 0x7;
+
 	else if (chip->keypad[0x8])
 		chip->registers[x] = 0x8;
+
 	else if (chip->keypad[0x9])
 		chip->registers[x] = 0x9;
+
 	else if (chip->keypad[0xA])
 		chip->registers[x] = 0xA;
+
 	else if (chip->keypad[0xB])
 		chip->registers[x] = 0xB;
+
 	else if (chip->keypad[0xC])
 		chip->registers[x] = 0xC;
+
 	else if (chip->keypad[0xD])
 		chip->registers[x] = 0xD;
+
 	else if (chip->keypad[0xE])
 		chip->registers[x] = 0xE;
+
 	else if (chip->keypad[0xF])
 		chip->registers[x] = 0xF;
+
 	else
 		chip->PC -= 2;
 }
