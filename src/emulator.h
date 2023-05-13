@@ -35,8 +35,6 @@ struct Chip8 {
 	uint16_t opcode;
 };
 
-uint8_t fontset[FONTSET_SIZE];
-
 // Create instance of emulator
 struct Chip8* createEmulator();
 

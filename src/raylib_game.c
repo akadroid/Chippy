@@ -12,6 +12,8 @@
 
 #include "raylib.h"
 #include "screens.h"    // NOTE: Declares global (extern) variables and screens functions
+#include <time.h>
+#include <stdlib.h>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -63,9 +65,9 @@ int main(void)
     InitAudioDevice();      // Initialize audio device
 
     // Load global data (assets that must be available in all screens, i.e. font)
-    font = LoadFont("resources/mecha.png");
-    fxCoin = LoadSound("resources/coin.wav");
-    fxBeep = LoadSound("resources/beep.wav");
+    font = LoadFont("../resources/mecha.png");
+    fxCoin = LoadSound("../resources/coin.wav");
+    fxBeep = LoadSound("../resources/beep.wav");
     srand(time(NULL));
 
     // Setup and init first screen
@@ -73,7 +75,7 @@ int main(void)
     InitTitleScreen();
 
     // Set Window icon =)
-    Image icon = LoadImage("resources/rika64.png");
+    Image icon = LoadImage("../resources/rika64.png");
     SetWindowIcon(icon);
     UnloadImage(icon);
 
